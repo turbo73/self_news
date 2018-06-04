@@ -1,101 +1,94 @@
 <template lang="html">
-  <div>
-    <div class="mask" @click="clickMask"></div>
-    <transition name="fade">
-      <div class="login-information" v-if="showLogin">
-        <div class="login-content" v-show="showContent">
-          <div class="login-head">
-            <div class="avatar">
-              <img src="../assets/tongyong.jpg">
+    <div>
+        <div class="mask" @click="clickMask"></div>
+        <transition name="fade">
+            <div class="login-information" v-if="showLogin">
+                <div class="login-content" v-show="showContent">
+                    <div class="login-head">
+                        <div class="avatar">
+                            <img src="../assets/tongyong.jpg">
+                        </div>
+                        <div class="username">{{login_name}}</div>
+                    </div>
+                    <div class="login-list">
+                        <ul>
+                            <router-link to="/collection"><li><img src="../assets/collection.png">我的收藏</li></router-link>
+                            <li><img src="../assets/aboutme.png">关于我</li>
+                            <li @click="cancel"><img src="../assets/cancel.png">注销</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="nologin" v-show="showNologin">
+                    <div class="nologin-content">
+                        <input v-model="username" type="text" placeholder="邮箱">
+                        <input v-model="password" type="password" placeholder="密码">
+                        <button @click="clickLogin">登录</button>
+                        <div class="register">
+                            <span>立即注册</span>
+                            <span>忘记密码</span>
+                        </div>
+                    </div>
+                </div>
             </div>
-            <div class="username">{{login_name}}</div>
-          </div>
-          <div class="login-list">
-            <ul>
-              <router-link to="/collection"><li><img src="../assets/collection.png">我的收藏</li></router-link>
-              <li><img src="../assets/aboutme.png">关于我</li>
-              <li @click="cancel"><img src="../assets/cancel.png">注销</li>
-            </ul>
-          </div>
-        </div>
-        <div class="nologin" v-show="showNologin">
-          <div class="nologin-content">
-            <input v-model="username" type="text" placeholder="邮箱">
-            <input v-model="password" type="password" placeholder="密码">
-            <button @click="clickLogin">登录</button>
-            <div class="register">
-              <span>立即注册</span>
-              <span>忘记密码</span>
-            </div>
-          </div>
-        </div>
-      </div>
-    </transition>
-  </div>
+        </transition>
+    </div>
 </template>
 
 <script>
-export default {
-  data() {
-    return {
-      showContent: false,
-      showNologin: true,
-      username: null,
-      password: null,
-    }
-  },
-  created() {
-    // this.$store.commit('muShowLogin', false)
-    // 此处决定显示登录界面or用户页面
-    // this.$store.commit('muLoginName', 'turbo73')
-    var self=this
-    self.$http.get('/api/permission/users/profile/').then(function (res) {
-      if(!res.data.username)return
-      self.$store.commit('muLoginName', res.data.username)
-                self.showContent = true
-                self.showNologin = false
-              })
-    // this.$store.commit('muLoginName', '')
-  },
-  methods: {
-    clickMask() {
-      this.$store.state.showMy = false
-      this.$store.state.showLogin = false
-    },
-    cancel() {
-      var self=this
-        self.$http.post('/api/permission/users/logout/').then((res)=>{
-          // this.$store.commit('muShowLogin', true)
-          // self.$store.commit('muLoginName', '')
-          self.showContent = false
-          self.showNologin = true
-          // return
-        })
-    },
-    clickLogin() {
-        var self=this
-        self.$http.post('/api/permission/users/login/',{'username':self.username, 'password':self.password}).then((xres)=>{
+    export default {
+        data() {
+            return {
+                showContent: false,
+                showNologin: true,
+                username: null,
+                password: null,
+            }
+        },
+        created() {
+            var self=this
             self.$http.get('/api/permission/users/profile/').then(function (res) {
+                if(!res.data.username)return
                 self.$store.commit('muLoginName', res.data.username)
                 self.showContent = true
                 self.showNologin = false
             })
-        })
+        },
+        methods: {
+            clickMask() {
+                this.$store.state.showMy = false
+                this.$store.state.showLogin = false
+            },
+            cancel() {
+                var self=this
+                self.$http.post('/api/permission/users/logout/').then((res)=>{
+                    self.showContent = false
+                    self.showNologin = true
+                })
+            },
+            clickLogin() {
+                var self=this
+                self.$http.post('/api/permission/users/login/',{'username':self.username, 'password':self.password}).then((xres)=>{
+                    self.$http.get('/api/permission/users/profile/').then(function (res) {
+                        self.$store.commit('muLoginName', res.data.username)
+                        self.showContent = true
+                        self.showNologin = false
+                    })
+                })
+            }
+        },
+        computed: {
+            showLogin() {
+                if(this.$store.state.loginName!=''){
+                    this.showContent = true
+                    this.showNologin = false
+                }
+                return this.$store.state.showLogin
+            },
+            login_name(){
+                return this.$store.state.loginName
+            }
+        }
     }
-},
-  computed: {
-    showLogin() {
-      if(this.$store.state.loginName!=''){
-        this.showContent = true
-        this.showNologin = false
-      }
-      return this.$store.state.showLogin
-    },
-    login_name(){
-        return this.$store.state.loginName
-    }
-  }
-}
 </script>
 
 <style lang="css" scoped>
