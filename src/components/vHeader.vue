@@ -1,13 +1,18 @@
 <template lang="html">
   <div class="header">
     <img src="../assets/identify.png" @click="clickIcon">
-    <span>圈圈新闻</span>
+    <span>{{domain_name}}新闻</span>
     <img src="../assets/search.png" @click="toSearch">
   </div>
 </template>
 
 <script>
 export default {
+  data(){
+    return{
+      domain_name:'圈圈~'
+    }
+  },
   methods: {
     toSearch() {
       this.$router.push('/search')

@@ -52,9 +52,15 @@ axios.interceptors.request.use(
 
 Vue.config.productionTip = false
 
+window.mapState = Vuex.mapState;
+window.mapMutations = Vuex.mapMutations;
+window.mapActions = Vuex.mapActions;
+window.mapGetters = Vuex.mapGetters;
+
 const store = new Vuex.Store({
   state: {
-    loginName: '',
+    loginName: sessionStorage.getItem('loginName'),
+    // loginName: '',
     channels: '',
     channelIndex: 0,
     channelData: '',
@@ -69,6 +75,10 @@ const store = new Vuex.Store({
   mutations: {
     muLoginName(state, data) {
       state.loginName = data
+      sessionStorage.setItem('loginName', data);
+    },
+    muCancelLoginName(state) {
+      sessionStorage.removeItem('loginName');
     },
     muChannels(state, data) {
       state.channels = data
@@ -132,6 +142,11 @@ const store = new Vuex.Store({
           })
           resolve()
       })
+    }
+  },
+  getters:{
+    getLoginName: function (state, getters) {
+      return state.loginName
     }
   }
 })

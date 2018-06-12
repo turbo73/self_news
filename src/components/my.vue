@@ -3,12 +3,12 @@
         <div class="mask" @click="clickMask"></div>
         <transition name="fade">
             <div class="login-information" v-if="showLogin">
-                <div class="login-content" v-show="showContent">
+                <div class="login-content" v-if="showContent">
                     <div class="login-head">
                         <div class="avatar">
                             <img src="../assets/tongyong.jpg">
                         </div>
-                        <div class="username">{{login_name}}</div>
+                        <div class="username">{{getLoginName}}</div>
                     </div>
                     <div class="login-list">
                         <ul>
@@ -18,7 +18,7 @@
                         </ul>
                     </div>
                 </div>
-                <div class="nologin" v-show="showNologin">
+                <div class="nologin" v-if="showNologin">
                     <div class="nologin-content">
                         <input v-model="username" type="text" placeholder="邮箱">
                         <input v-model="password" type="password" placeholder="密码">
@@ -35,6 +35,7 @@
 </template>
 
 <script>
+    import { mapGetters, mapActions } from 'vuex'
     export default {
         data() {
             return {
@@ -44,14 +45,11 @@
                 password: null,
             }
         },
-        created() {
-            var self=this
-            self.$http.get('/api/permission/users/profile/').then(function (res) {
-                if(!res.data.username)return
-                self.$store.commit('muLoginName', res.data.username)
-                self.showContent = true
-                self.showNologin = false
-            })
+        computed: {
+            ...mapGetters(['getLoginName']),
+            showLogin() {
+                return this.$store.state.showLogin
+            }
         },
         methods: {
             clickMask() {
@@ -60,6 +58,7 @@
             },
             cancel() {
                 var self=this
+                self.$store.commit('muCancelLoginName')
                 self.$http.post('/api/permission/users/logout/').then((res)=>{
                     self.showContent = false
                     self.showNologin = true
@@ -76,16 +75,11 @@
                 })
             }
         },
-        computed: {
-            showLogin() {
-                if(this.$store.state.loginName!=''){
-                    this.showContent = true
-                    this.showNologin = false
-                }
-                return this.$store.state.showLogin
-            },
-            login_name(){
-                return this.$store.state.loginName
+        created() {
+            var self=this
+            if(this.getLoginName){
+                self.showContent = true
+                self.showNologin = false
             }
         }
     }
